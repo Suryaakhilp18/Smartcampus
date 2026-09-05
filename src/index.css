@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-chivo: 'Chivo', sans-serif;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+html:not(.dark) {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: 'Chivo', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 250ms ease, color 250ms ease;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(11, 45, 107, 0.3) transparent;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(11, 45, 107, 0.3);
+  border-radius: 999px;
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/90 dark:bg-campus-cardDark/90 backdrop-blur-xl border border-white/80 dark:border-brand-500/20 shadow-glass;
+  }
+  .glass-panel-strong {
+    @apply bg-white/95 dark:bg-campus-cardDark/95 backdrop-blur-2xl border border-slate-200/70 dark:border-brand-500/25 shadow-glass-lg;
+  }
+  .icon-btn {
+    @apply inline-flex items-center justify-center rounded-xl transition-all duration-150 active:scale-95 hover:bg-brand-50 dark:hover:bg-brand-900/40 text-brand-700 dark:text-brand-200;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-accent-500 hover:bg-accent-600 text-white font-semibold px-4 py-2.5 shadow-cta transition-all duration-150 active:scale-95;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-50 dark:bg-brand-950/60 border border-brand-200/80 dark:border-brand-700/50 text-brand-700 dark:text-brand-200 font-semibold px-4 py-2.5 hover:bg-brand-100 dark:hover:bg-brand-900/50 transition-all duration-150 active:scale-95;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all duration-150 active:scale-95;
+  }
+  .skeleton {
+    @apply bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-brand-950 dark:via-brand-900 dark:to-brand-950 bg-[length:800px_100%] animate-shimmer rounded-xl;
+  }
+}
+
+.gm-style .gm-style-iw-c,
+.gm-style .gm-style-iw-t::after {
+  display: none !important;
+}
