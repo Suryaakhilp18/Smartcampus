@@ -30,17 +30,20 @@ const ACTIVITY_RADIUS: Record<string, number> = { high: 55, medium: 40, low: 28 
 function buildMarkerContent(
   loc: CampusLocation,
   selected: boolean,
+  isEmergency: boolean,
   onSelect: (loc: CampusLocation) => void
 ): HTMLDivElement {
   const el = document.createElement('div');
-  const size = selected ? 42 : 32;
+  const size = selected ? 42 : (isEmergency ? 38 : 32);
   el.style.width = `${size}px`;
   el.style.height = `${size}px`;
   el.style.borderRadius = '50%';
-  el.style.background = loc.color === '#0B2D6B' ? (selected ? '#F5821F' : '#0B2D6B') : loc.color;
-  el.style.border = selected ? '3px solid #FFFFFF' : '2px solid white';
+  el.style.background = isEmergency ? '#EF4444' : (loc.color === '#0B2D6B' ? (selected ? '#F5821F' : '#0B2D6B') : loc.color);
+  el.style.border = selected ? '3px solid #FFFFFF' : (isEmergency ? '3px solid #FCA5A5' : '2px solid white');
   el.style.boxShadow = selected
     ? '0 0 0 4px rgba(245, 130, 31, 0.6), 0 8px 20px rgba(0,0,0,0.4)'
+    : isEmergency
+    ? '0 0 0 4px rgba(239, 68, 68, 0.6), 0 8px 20px rgba(0,0,0,0.4)'
     : '0 2px 8px rgba(0,0,0,0.25)';
   el.style.display = 'flex';
   el.style.alignItems = 'center';
@@ -48,7 +51,7 @@ function buildMarkerContent(
   el.style.fontSize = `${size * 0.48}px`;
   el.style.cursor = 'pointer';
   el.style.transition = 'all 180ms ease-out';
-  el.style.transform = selected ? 'scale(1.2) translateY(-3px)' : 'scale(1)';
+  el.style.transform = selected ? 'scale(1.2) translateY(-3px)' : (isEmergency ? 'scale(1.1)' : 'scale(1)');
   el.title = loc.name;
   el.textContent = loc.icon || CATEGORY_META[loc.category].emoji;
 
@@ -57,9 +60,11 @@ function buildMarkerContent(
     el.style.boxShadow = '0 6px 16px rgba(245, 130, 31, 0.45)';
   });
   el.addEventListener('mouseleave', () => {
-    el.style.transform = selected ? 'scale(1.2) translateY(-3px)' : 'scale(1)';
+    el.style.transform = selected ? 'scale(1.2) translateY(-3px)' : (isEmergency ? 'scale(1.1)' : 'scale(1)');
     el.style.boxShadow = selected
       ? '0 0 0 4px rgba(245, 130, 31, 0.6), 0 8px 20px rgba(0,0,0,0.4)'
+      : isEmergency
+      ? '0 0 0 4px rgba(239, 68, 68, 0.6), 0 8px 20px rgba(0,0,0,0.4)'
       : '0 2px 8px rgba(0,0,0,0.25)';
   });
 
@@ -80,7 +85,7 @@ export default function GoogleMapCanvas({
   showBuildings,
   userLocation,
   route,
-  emergencyIds = [],
+  emergencyIds, 
 }: Props) {
   const mapDivRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -191,10 +196,11 @@ export default function GoogleMapCanvas({
     locations.forEach((loc) => {
       const existing = markersRef.current.get(loc.id);
       const selected = selectedId === loc.id;
+      const isEmergency = (emergencyIds ?? []).includes(loc.id);
 
       if (existing) {
-        existing.content = buildMarkerContent(loc, selected, onSelect);
-        existing.zIndex = selected ? 999 : undefined;
+        existing.content = buildMarkerContent(loc, selected, isEmergency, onSelect);
+        existing.zIndex = selected || isEmergency ? 999 : undefined;
         return;
       }
 
@@ -202,9 +208,9 @@ export default function GoogleMapCanvas({
         const marker = new google.maps.marker.AdvancedMarkerElement({
           map,
           position: { lat: loc.lat, lng: loc.lng },
-          content: buildMarkerContent(loc, selected, onSelect),
+          content: buildMarkerContent(loc, selected, isEmergency, onSelect),
           title: loc.name,
-          zIndex: selected ? 999 : undefined,
+          zIndex: selected || isEmergency ? 999 : undefined,
         });
 
         marker.addListener('click', () => onSelect(loc));
@@ -222,7 +228,7 @@ export default function GoogleMapCanvas({
         console.warn(`Could not create AdvancedMarkerElement for ${loc.id}:`, err);
       }
     });
-  }, [locations, selectedId, onSelect]);
+  }, [locations, selectedId, emergencyIds, onSelect]);
 
   // Pan to selected location smoothly
   useEffect(() => {
@@ -367,3 +373,6 @@ export default function GoogleMapCanvas({
     />
   );
 }
+
+
+
